@@ -1,11 +1,7 @@
 import json
-from pathlib import Path
 from typing import Any
 
-
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
-BRONZE_DIRECTORY = PROJECT_ROOT / "data" / "bronze"
-BRONZE_FILE = BRONZE_DIRECTORY / "telemetry.jsonl"
+from core.config import BRONZE_DIRECTORY, BRONZE_FILE
 
 
 def write_event(event: dict[str, Any]) -> None:

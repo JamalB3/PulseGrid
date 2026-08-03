@@ -1,30 +1,27 @@
 from pathlib import Path
 
 import pandas as pd
+from core.config import (
+
+    DEVICE_HEALTH_FILE,
+
+    DEVICE_OFFLINE_MINUTES,
+
+    GOLD_DIRECTORY,
+
+    HOURLY_METRICS_FILE,
+
+    LOCATION_METRICS_FILE,
+
+    SILVER_FILE,
+
+    TEMPERATURE_ALERT_THRESHOLD,
+
+)
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
-SILVER_FILE = (
-    PROJECT_ROOT
-    / "data"
-    / "silver"
-    / "telemetry_clean.parquet"
-)
-
-GOLD_DIRECTORY = PROJECT_ROOT / "data" / "gold"
-
-LOCATION_METRICS_FILE = (
-    GOLD_DIRECTORY / "location_metrics.parquet"
-)
-
-HOURLY_METRICS_FILE = (
-    GOLD_DIRECTORY / "hourly_metrics.parquet"
-)
-
-DEVICE_HEALTH_FILE = (
-    GOLD_DIRECTORY / "device_health.parquet"
-)
 
 
 def load_silver_data() -> pd.DataFrame:
@@ -48,10 +45,20 @@ def load_silver_data() -> pd.DataFrame:
 def build_location_metrics(
     dataframe: pd.DataFrame,
 ) -> pd.DataFrame:
-    """Aggregate telemetry metrics for each building location."""
+    """Aggregate telemetry metrics for each building room."""
 
     location_metrics = (
-        dataframe.groupby("location", as_index=False)
+        dataframe.groupby(
+            [
+                "building_id",
+                "building",
+                "floor",
+                "room_id",
+                "room",
+                "room_type",
+            ],
+            as_index=False,
+        )
         .agg(
             total_events=("event_id", "count"),
             unique_devices=("device_id", "nunique"),
@@ -82,7 +89,6 @@ def build_location_metrics(
 
     return location_metrics
 
-
 def build_hourly_metrics(
     dataframe: pd.DataFrame,
 ) -> pd.DataFrame:
@@ -96,7 +102,15 @@ def build_hourly_metrics(
 
     hourly_metrics = (
         hourly_dataframe.groupby(
-            ["event_hour", "location"],
+            [
+                "event_hour",
+                "building_id",
+                "building",
+                "floor",
+                "room_id",
+                "room",
+                "room_type",
+            ],
             as_index=False,
         )
         .agg(
@@ -133,7 +147,15 @@ def build_device_health(
 
     device_health = (
         dataframe.groupby(
-            ["device_id", "location"],
+            [
+                "device_id",
+                "building_id",
+                "building",
+                "floor",
+                "room_id",
+                "room",
+                "room_type",
+                ],
             as_index=False,
         )
         .agg(
@@ -156,7 +178,8 @@ def build_device_health(
     )
 
     device_health["temperature_alert"] = (
-        device_health["maximum_temperature"] > 78
+        device_health["maximum_temperature"]
+        > TEMPERATURE_ALERT_THRESHOLD
     )
 
     device_health["device_status"] = (
@@ -164,7 +187,7 @@ def build_device_health(
         .apply(
             lambda minutes: (
                 "offline"
-                if minutes > 5
+                if minutes > DEVICE_OFFLINE_MINUTES
                 else "online"
             )
         )

@@ -5,55 +5,14 @@ from datetime import datetime, timezone
 from typing import Any
 from generator.file_writer import write_event
 from uuid import uuid4
+from core.config import SIMULATION_FILE
+from core.config_loader import load_json
+from generator.device_loader import load_devices
+from generator.file_writer import write_event
 
 
-DEVICES = [
-    {
-        "device_id": "sensor_001",
-        "location": "conference_room",
-        "temperature_range": (70.0, 75.0),
-        "humidity_range": (40.0, 60.0),
-        "energy_range": (1.0, 4.5),
-        "air_quality_range": (20, 70),
-        "occupancy_range": (0, 25),
-    },
-    {
-        "device_id": "sensor_002",
-        "location": "server_room",
-        "temperature_range": (68.0, 78.0),
-        "humidity_range": (35.0, 45.0),
-        "energy_range": (3.0, 8.0),
-        "air_quality_range": (15, 50),
-        "occupancy_range": (0, 2),
-    },
-    {
-        "device_id": "sensor_003",
-        "location": "lobby",
-        "temperature_range": (70.0, 77.0),
-        "humidity_range": (40.0, 65.0),
-        "energy_range": (1.5, 5.5),
-        "air_quality_range": (20, 80),
-        "occupancy_range": (0, 50),
-    },
-    {
-        "device_id": "sensor_004",
-        "location": "office_1",
-        "temperature_range": (69.0, 76.0),
-        "humidity_range": (38.0, 58.0),
-        "energy_range": (0.5, 3.0),
-        "air_quality_range": (20, 65),
-        "occupancy_range": (0, 6),
-    },
-    {
-        "device_id": "sensor_005",
-        "location": "office_2",
-        "temperature_range": (69.0, 76.0),
-        "humidity_range": (38.0, 58.0),
-        "energy_range": (0.5, 3.0),
-        "air_quality_range": (20, 65),
-        "occupancy_range": (0, 6),
-    },
-]
+DEVICES = load_devices()
+SIMULATION_CONFIG = load_json(SIMULATION_FILE)
 
 
 def random_decimal(value_range: tuple[float, float]) -> float:
@@ -64,12 +23,17 @@ def random_decimal(value_range: tuple[float, float]) -> float:
 
 
 def generate_telemetry(device: dict[str, Any]) -> dict[str, Any]:
-    """Generate one realistic telemetry event for a simulated device."""
+    """Generate one realistic telemetry event."""
 
     event = {
         "event_id": str(uuid4()),
         "device_id": device["device_id"],
-        "location": device["location"],
+        "building_id": device["building_id"],
+        "building": device["building"],
+        "floor": device["floor"],
+        "room_id": device["room_id"],
+        "room": device["room"],
+        "room_type": device["room_type"],
         "timestamp": datetime.now(timezone.utc).isoformat(),
         "temperature": random_decimal(device["temperature_range"]),
         "humidity": random_decimal(device["humidity_range"]),
@@ -78,20 +42,37 @@ def generate_telemetry(device: dict[str, Any]) -> dict[str, Any]:
         "occupancy": random.randint(*device["occupancy_range"]),
     }
 
-    # Introduce occasional data-quality problems.
     anomaly_roll = random.random()
 
-    if anomaly_roll < 0.02:
+    invalid_temperature_limit = (
+        SIMULATION_CONFIG["invalid_temperature_probability"]
+    )
+
+    missing_humidity_limit = (
+        invalid_temperature_limit
+        + SIMULATION_CONFIG["missing_humidity_probability"]
+    )
+
+    missing_device_limit = (
+        missing_humidity_limit
+        + SIMULATION_CONFIG["missing_device_id_probability"]
+    )
+
+    negative_energy_limit = (
+        missing_device_limit
+        + SIMULATION_CONFIG["negative_energy_probability"]
+    )
+
+    if anomaly_roll < invalid_temperature_limit:
         event["temperature"] = 999.0
-    elif anomaly_roll < 0.04:
+    elif anomaly_roll < missing_humidity_limit:
         event["humidity"] = None
-    elif anomaly_roll < 0.06:
+    elif anomaly_roll < missing_device_limit:
         event["device_id"] = None
-    elif anomaly_roll < 0.08:
+    elif anomaly_roll < negative_energy_limit:
         event["energy_usage"] = -5.0
 
     return event
-
 
 def main() -> None:
     """Continuously generate and store simulated IoT telemetry."""
@@ -106,7 +87,7 @@ def main() -> None:
             device = random.choice(DEVICES)
 
             # Occasionally resend the previous event to simulate a duplicate.
-            if previous_event is not None and random.random() < 0.05:
+            if previous_event is not None and random.random() < SIMULATION_CONFIG["duplicate_probability"]:
                 telemetry = previous_event.copy()
                 print("DUPLICATE:", json.dumps(telemetry))
             else:
@@ -116,7 +97,9 @@ def main() -> None:
 
             write_event(telemetry)
 
-            time.sleep(0.2)
+            time.sleep(
+                SIMULATION_CONFIG["event_interval_seconds"]
+            )
 
     except KeyboardInterrupt:
         print("\nSimulator stopped.")

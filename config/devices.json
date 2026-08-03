@@ -1,0 +1,57 @@
+[
+    {
+        "device_id": "sensor_001",
+        "building": "Miami HQ",
+        "floor": 1,
+        "room": "Conference Room",
+        "temperature_range": [70, 75],
+        "humidity_range": [40, 60],
+        "energy_range": [1.0, 4.5],
+        "air_quality_range": [20, 70],
+        "occupancy_range": [0, 25]
+    },
+    {
+        "device_id": "sensor_002",
+        "building": "Miami HQ",
+        "floor": 1,
+        "room": "Server Room",
+        "temperature_range": [68, 78],
+        "humidity_range": [35, 45],
+        "energy_range": [3.0, 8.0],
+        "air_quality_range": [15, 50],
+        "occupancy_range": [0, 2]
+    },
+    {
+        "device_id": "sensor_003",
+        "building": "Miami HQ",
+        "floor": 1,
+        "room": "Lobby",
+        "temperature_range": [70, 77],
+        "humidity_range": [40, 65],
+        "energy_range": [1.5, 5.5],
+        "air_quality_range": [20, 80],
+        "occupancy_range": [0, 50]
+    },
+    {
+        "device_id": "sensor_004",
+        "building": "Miami HQ",
+        "floor": 2,
+        "room": "Office 201",
+        "temperature_range": [69, 76],
+        "humidity_range": [38, 58],
+        "energy_range": [0.5, 3.0],
+        "air_quality_range": [20, 65],
+        "occupancy_range": [0, 6]
+    },
+    {
+        "device_id": "sensor_005",
+        "building": "Miami HQ",
+        "floor": 2,
+        "room": "Office 202",
+        "temperature_range": [69, 76],
+        "humidity_range": [38, 58],
+        "energy_range": [0.5, 3.0],
+        "air_quality_range": [20, 65],
+        "occupancy_range": [0, 6]
+    }
+]

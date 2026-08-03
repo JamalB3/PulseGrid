@@ -4,21 +4,31 @@ from typing import Any
 
 import pandas as pd
 
-
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
-
-BRONZE_FILE = PROJECT_ROOT / "data" / "bronze" / "telemetry.jsonl"
-
-SILVER_DIRECTORY = PROJECT_ROOT / "data" / "silver"
-SILVER_FILE = SILVER_DIRECTORY / "telemetry_clean.parquet"
-
-QUARANTINE_FILE = SILVER_DIRECTORY / "rejected_events.jsonl"
+from core.config import (
+    BRONZE_FILE,
+    MAX_AIR_QUALITY,
+    MAX_HUMIDITY,
+    MAX_TEMPERATURE,
+    MIN_AIR_QUALITY,
+    MIN_ENERGY_USAGE,
+    MIN_HUMIDITY,
+    MIN_OCCUPANCY,
+    MIN_TEMPERATURE,
+    REJECTED_FILE,
+    SILVER_DIRECTORY,
+    SILVER_FILE,
+)
 
 
 REQUIRED_COLUMNS = [
     "event_id",
     "device_id",
-    "location",
+    "building_id",
+    "building",
+    "floor",
+    "room_id",
+    "room",
+    "room_type",
     "timestamp",
     "temperature",
     "humidity",
@@ -99,11 +109,24 @@ def identify_invalid_events(dataframe: pd.DataFrame) -> pd.Series:
 
     missing_required_values = dataframe[REQUIRED_COLUMNS].isna().any(axis=1)
 
-    invalid_temperature = ~dataframe["temperature"].between(50, 120)
-    invalid_humidity = ~dataframe["humidity"].between(0, 100)
-    invalid_energy = dataframe["energy_usage"] < 0
-    invalid_air_quality = ~dataframe["air_quality"].between(0, 500)
-    invalid_occupancy = dataframe["occupancy"] < 0
+    invalid_temperature = ~dataframe["temperature"].between(
+        MIN_TEMPERATURE,
+        MAX_TEMPERATURE,
+    )
+
+    invalid_humidity = ~dataframe["humidity"].between(
+        MIN_HUMIDITY,
+        MAX_HUMIDITY,
+    )
+
+    invalid_energy = dataframe["energy_usage"] < MIN_ENERGY_USAGE
+
+    invalid_air_quality = ~dataframe["air_quality"].between(
+        MIN_AIR_QUALITY,
+        MAX_AIR_QUALITY,
+    )
+
+    invalid_occupancy = dataframe["occupancy"] < MIN_OCCUPANCY
 
     parse_error = dataframe.get(
         "_parse_error",
@@ -128,7 +151,7 @@ def write_rejected_events(dataframe: pd.DataFrame) -> None:
 
     records = dataframe.to_dict(orient="records")
 
-    with QUARANTINE_FILE.open("w", encoding="utf-8") as file:
+    with REJECTED_FILE.open("w", encoding="utf-8") as file:
         for record in records:
             serialized_record = {}
 
@@ -189,7 +212,7 @@ def build_silver_layer() -> None:
     print(f"Duplicates removed: {duplicates_removed}")
     print(f"Silver records: {len(valid_dataframe)}")
     print(f"Silver file: {SILVER_FILE}")
-    print(f"Quarantine file: {QUARANTINE_FILE}")
+    print(f"Quarantine file: {REJECTED_FILE}")
 
 
 if __name__ == "__main__":

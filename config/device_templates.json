@@ -1,0 +1,30 @@
+{
+  "conference_room": {
+    "temperature_range": [70.0, 75.0],
+    "humidity_range": [40.0, 60.0],
+    "energy_range": [1.0, 4.5],
+    "air_quality_range": [20, 70],
+    "occupancy_range": [0, 25]
+  },
+  "server_room": {
+    "temperature_range": [68.0, 78.0],
+    "humidity_range": [35.0, 45.0],
+    "energy_range": [3.0, 8.0],
+    "air_quality_range": [15, 50],
+    "occupancy_range": [0, 2]
+  },
+  "lobby": {
+    "temperature_range": [70.0, 77.0],
+    "humidity_range": [40.0, 65.0],
+    "energy_range": [1.5, 5.5],
+    "air_quality_range": [20, 80],
+    "occupancy_range": [0, 50]
+  },
+  "office": {
+    "temperature_range": [69.0, 76.0],
+    "humidity_range": [38.0, 58.0],
+    "energy_range": [0.5, 3.0],
+    "air_quality_range": [20, 65],
+    "occupancy_range": [0, 6]
+  }
+}

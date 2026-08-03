@@ -1,0 +1,46 @@
+[
+  {
+    "building_id": "building_miami_hq",
+    "name": "Miami HQ",
+    "city": "Miami",
+    "state": "Florida",
+    "timezone": "America/New_York",
+    "floors": [
+      {
+        "floor_number": 1,
+        "rooms": [
+          {
+            "room_id": "miami_1_conference",
+            "name": "Conference Room",
+            "room_type": "conference_room"
+          },
+          {
+            "room_id": "miami_1_server",
+            "name": "Server Room",
+            "room_type": "server_room"
+          },
+          {
+            "room_id": "miami_1_lobby",
+            "name": "Lobby",
+            "room_type": "lobby"
+          }
+        ]
+      },
+      {
+        "floor_number": 2,
+        "rooms": [
+          {
+            "room_id": "miami_2_office_201",
+            "name": "Office 201",
+            "room_type": "office"
+          },
+          {
+            "room_id": "miami_2_office_202",
+            "name": "Office 202",
+            "room_type": "office"
+          }
+        ]
+      }
+    ]
+  }
+]

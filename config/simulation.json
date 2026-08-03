@@ -1,0 +1,8 @@
+{
+  "event_interval_seconds": 0.2,
+  "duplicate_probability": 0.05,
+  "invalid_temperature_probability": 0.02,
+  "missing_humidity_probability": 0.02,
+  "missing_device_id_probability": 0.02,
+  "negative_energy_probability": 0.02
+}
