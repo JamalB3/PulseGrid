@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
 from typing import Any
-
+from core.logger import logger
 import pandas as pd
 
 from core.config import (
@@ -170,6 +170,7 @@ def write_rejected_events(dataframe: pd.DataFrame) -> None:
 def build_silver_layer() -> None:
     """Clean Bronze events and write validated Silver data."""
 
+    logger.info("Starting Silver-layer processing.")
     bronze_dataframe = load_bronze_events(BRONZE_FILE)
     prepared_dataframe = prepare_dataframe(bronze_dataframe)
 
@@ -206,13 +207,19 @@ def build_silver_layer() -> None:
 
     write_rejected_events(rejected_dataframe)
 
-    print("Silver processing complete.")
-    print(f"Bronze records: {total_records}")
-    print(f"Rejected records: {len(rejected_dataframe)}")
-    print(f"Duplicates removed: {duplicates_removed}")
-    print(f"Silver records: {len(valid_dataframe)}")
-    print(f"Silver file: {SILVER_FILE}")
-    print(f"Quarantine file: {REJECTED_FILE}")
+    logger.info("Silver processing completed successfully.")
+    logger.info("Bronze records loaded: %d", total_records)
+    logger.info("Rejected records: %d", len(rejected_dataframe))
+    if duplicates_removed > 0:
+        logger.warning(
+            "Duplicate telemetry events removed: %d",
+            duplicates_removed,
+            )
+    else:
+        logger.info("No duplicate telemetry events were found.") 
+    logger.info("Silver records written: %d", len(valid_dataframe))
+    logger.info("Silver output file: %s", SILVER_FILE)
+    logger.info("Rejected-event file: %s", REJECTED_FILE)
 
 
 if __name__ == "__main__":
