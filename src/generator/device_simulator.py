@@ -9,6 +9,7 @@ from core.config import SIMULATION_FILE
 from core.config_loader import load_json
 from generator.device_loader import load_devices
 from generator.file_writer import write_event
+from core.logger import logger
 
 
 DEVICES = load_devices()
@@ -77,8 +78,8 @@ def generate_telemetry(device: dict[str, Any]) -> dict[str, Any]:
 def main() -> None:
     """Continuously generate and store simulated IoT telemetry."""
 
-    print("Starting IoT device simulator...")
-    print("Press Control + C to stop.\n")
+    logger.info("Starting IoT device simulator.")
+    logger.info("Press Control + C to stop.")
 
     previous_event = None
 
@@ -89,11 +90,17 @@ def main() -> None:
             # Occasionally resend the previous event to simulate a duplicate.
             if previous_event is not None and random.random() < SIMULATION_CONFIG["duplicate_probability"]:
                 telemetry = previous_event.copy()
-                print("DUPLICATE:", json.dumps(telemetry))
+                logger.warning(
+                    "Generated duplicate telemetry event: %s",
+                    json.dumps(telemetry),
+                )
             else:
                 telemetry = generate_telemetry(device)
                 previous_event = telemetry.copy()
-                print(json.dumps(telemetry))
+                logger.debug(
+                    "Generated telemetry event: %s",
+                    json.dumps(telemetry),
+                    )
 
             write_event(telemetry)
 
@@ -102,7 +109,7 @@ def main() -> None:
             )
 
     except KeyboardInterrupt:
-        print("\nSimulator stopped.")
+        logger.info("IoT device simulator stopped by user.")
 
 
 if __name__ == "__main__":

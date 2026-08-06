@@ -1,5 +1,5 @@
 from pathlib import Path
-
+from core.logger import logger
 import pandas as pd
 from core.config import (
 
@@ -209,6 +209,7 @@ def build_device_health(
 def build_gold_layer() -> None:
     """Create analytics-ready Gold tables."""
 
+    logger.info("Starting Gold-layer processing.")
     dataframe = load_silver_data()
 
     GOLD_DIRECTORY.mkdir(
@@ -235,17 +236,11 @@ def build_gold_layer() -> None:
         index=False,
     )
 
-    print("Gold processing complete.")
-    print(
-        f"Location metrics: {len(location_metrics)} rows"
-    )
-    print(
-        f"Hourly metrics: {len(hourly_metrics)} rows"
-    )
-    print(
-        f"Device health: {len(device_health)} rows"
-    )
-    print(f"Gold directory: {GOLD_DIRECTORY}")
+    logger.info("Gold processing completed successfully.")
+    logger.info("Room metrics written: %d rows", len(location_metrics))
+    logger.info("Hourly metrics written: %d rows", len(hourly_metrics))
+    logger.info("Device-health metrics written: %d rows", len(device_health))
+    logger.info("Gold output directory: %s", GOLD_DIRECTORY)
 
 
 if __name__ == "__main__":
