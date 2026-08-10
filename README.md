@@ -136,9 +136,9 @@ Building the project end-to-end also allows me to explore the engineering requir
 
 - **Git & GitHub** — version control, feature branches, and pull requests
 
-### Planned
-
 - **Pytest** — automated unit and integration testing
+
+### Planned
 
 - **Apache Spark** — distributed telemetry processing
 
@@ -280,6 +280,36 @@ logs/pulsegrid.log
 
 ---
 
+## 🧪 Testing
+
+PulseGrid uses Pytest for automated unit and integration testing.
+
+The current test suite validates:
+
+- Configuration-driven device generation
+- Required device schema fields
+- Unique device identifiers
+- Telemetry event structure
+- Sensor values against configured ranges
+- Controlled anomaly generation
+- Protection against mutation during anomaly injection
+- Silver-layer data validation
+- Invalid telemetry rejection
+- Duplicate-event handling
+- Bronze-to-Silver integration behavior
+
+### Run the Test Suite
+
+From the project root with the virtual environment activated:
+
+```bash
+PYTHONPATH=src python -m pytest -v
+```
+
+The tests are isolated from production data where appropriate. Integration tests use Pytest temporary directories to create disposable test data without modifying the project's actual Bronze, Silver, or Gold datasets.
+
+---
+
 ## 🧠 Engineering Decisions
 
 ### Configuration-Driven Architecture
@@ -314,7 +344,7 @@ Simulation, validation, analytics, configuration, and logging are separated into
 - [x] Configuration-driven device generation
 - [x] Structured logging
 - [x] Pipeline runner
-- [ ] Automated testing
+- [x] Automated testing
 
 ### Phase 2 — Platform Engineering
 - [ ] Docker containerization
