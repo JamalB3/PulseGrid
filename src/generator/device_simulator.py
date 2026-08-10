@@ -23,10 +23,12 @@ def random_decimal(value_range: tuple[float, float]) -> float:
     return round(random.uniform(minimum, maximum), 2)
 
 
-def generate_telemetry(device: dict[str, Any]) -> dict[str, Any]:
-    """Generate one realistic telemetry event."""
+def generate_normal_telemetry(
+    device: dict[str, Any],
+) -> dict[str, Any]:
+    """Generate one valid telemetry event within configured ranges."""
 
-    event = {
+    return {
         "event_id": str(uuid4()),
         "device_id": device["device_id"],
         "building_id": device["building_id"],
@@ -43,6 +45,14 @@ def generate_telemetry(device: dict[str, Any]) -> dict[str, Any]:
         "occupancy": random.randint(*device["occupancy_range"]),
     }
 
+
+def inject_anomaly(
+    event: dict[str, Any],
+) -> dict[str, Any]:
+    """Optionally inject one simulated data-quality anomaly."""
+
+    event = event.copy()
+    
     anomaly_roll = random.random()
 
     invalid_temperature_limit = (
@@ -74,6 +84,17 @@ def generate_telemetry(device: dict[str, Any]) -> dict[str, Any]:
         event["energy_usage"] = -5.0
 
     return event
+
+
+def generate_telemetry(
+    device: dict[str, Any],
+) -> dict[str, Any]:
+    """Generate telemetry and optionally inject an anomaly."""
+
+    event = generate_normal_telemetry(device)
+
+    return inject_anomaly(event)
+
 
 def main() -> None:
     """Continuously generate and store simulated IoT telemetry."""
